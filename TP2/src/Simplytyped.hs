@@ -50,8 +50,8 @@ quote (VLam t f) = Lam t f
 eval :: NameEnv Value Type -> Term -> Value
 eval nvs fv@(Free n)   = case lookup n nvs of
                               Just x -> x
-                              _      -> VLam E fv
-eval nvs (lt1 :@: lt2) = sub 0 (quote (eval nvs lt2)) (quote (eval nvs lt1))
+                              _      -> VLam EmptyT fv
+eval nvs (lt1 :@: lt2) = eval nvs (sub 0 (quote (eval nvs lt2)) (quote (eval nvs lt1)))
 eval nvs (Lam t lt)    = VLam t lt
 
 
