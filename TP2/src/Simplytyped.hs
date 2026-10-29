@@ -49,9 +49,10 @@ quote (VLam t f) = Lam t f
 -- Qué pasa si la var no está en el entorno? Por ahora devuelvo VLam E fv. PREGUNTAR
 eval :: NameEnv Value Type -> Term -> Value
 eval nvs fv@(Free n)   = case lookup n nvs of
-                              Just x -> x
-                              _      -> VLam EmptyT fv
-eval nvs (lt1 :@: lt2) = eval nvs (sub 0 (quote (eval nvs lt2)) (quote (eval nvs lt1)))
+                              Just (v, _) -> v
+                              -- _           -> VLam EmptyT fv
+eval nvs (lt1 :@: lt2) = case eval nvs lt1 of
+                              VLam _ alt -> eval nvs (sub 0 (quote (eval nvs lt2)) alt)
 eval nvs (Lam t lt)    = VLam t lt
 
 
