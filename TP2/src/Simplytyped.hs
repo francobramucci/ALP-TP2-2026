@@ -22,11 +22,10 @@ import           Common
 conversion :: LamTerm -> Term
 conversion lt = aux lt M.empty
 
-
 aux :: LamTerm -> M.Map String Int -> Term
 aux (LVar s)       m = case M.lookup s m of
-                             Just x  -> Bound x
-                             _       -> Free (Global s)
+                            Just x  -> Bound x
+                            _       -> Free (Global s)
 aux (LAbs s ty lt) m = Lam ty (aux lt (M.insert s 0 (M.map (+1) m)))
 aux (LApp lt1 lt2) m = (aux lt1 m) :@: (aux lt2 m)
 
@@ -47,10 +46,13 @@ quote :: Value -> Term
 quote (VLam t f) = Lam t f
 
 -- evalúa un término en un entorno dado
+-- Qué pasa si la var no está en el entorno? Por ahora devuelvo VLam E fv. PREGUNTAR
 eval :: NameEnv Value Type -> Term -> Value
-eval = undefined
-
-
+eval nvs fv@(Free n)   = case lookup n nvs of
+                              Just x -> x
+                              _      -> VLam E fv
+eval nvs (lt1 :@: lt2) = sub 0 (quote (eval nvs lt2)) (quote (eval nvs lt1))
+eval nvs (Lam t lt)    = VLam t lt
 
 
 ----------------------
