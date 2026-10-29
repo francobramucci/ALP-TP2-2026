@@ -46,11 +46,10 @@ quote :: Value -> Term
 quote (VLam t f) = Lam t f
 
 -- evalúa un término en un entorno dado
--- Qué pasa si la var no está en el entorno? Por ahora devuelvo VLam E fv. PREGUNTAR
+-- Qué pasa si la var no está en el entorno? Lo maneja el type checker
 eval :: NameEnv Value Type -> Term -> Value
 eval nvs fv@(Free n)   = case lookup n nvs of
                               Just (v, _) -> v
-                              -- _           -> VLam EmptyT fv
 eval nvs (lt1 :@: lt2) = case eval nvs lt1 of
                               VLam _ alt -> eval nvs (sub 0 (quote (eval nvs lt2)) alt)
 eval nvs (Lam t lt)    = VLam t lt
