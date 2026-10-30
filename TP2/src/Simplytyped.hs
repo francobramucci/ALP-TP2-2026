@@ -23,12 +23,15 @@ conversion :: LamTerm -> Term
 conversion lt = aux lt M.empty
 
 aux :: LamTerm -> M.Map String Int -> Term
-aux (LVar s)         m = case M.lookup s m of
-                              Just x  -> Bound x
-                              _       -> Free (Global s)
-aux (LAbs s ty lt)   m = Lam ty (aux lt (M.insert s 0 (M.map (+1) m)))
-aux (LApp lt1 lt2)   m = (aux lt1 m) :@: (aux lt2 m)
-aux (LLet s lt1 lt2) m = Let (aux lt1 m) (aux lt2 (M.insert s 0 (M.map (+1) m)))
+aux (LVar s)           m = case M.lookup s m of
+                                Just x  -> Bound x
+                                _       -> Free (Global s)
+aux (LAbs s ty lt)     m = Lam ty (aux lt (M.insert s 0 (M.map (+1) m)))
+aux (LApp lt1 lt2)     m = (aux lt1 m) :@: (aux lt2 m)
+aux (LLet s lt1 lt2)   m = Let (aux lt1 m) (aux lt2 (M.insert s 0 (M.map (+1) m)))
+aux (LZero)            m = Zero
+aux (LSuc lt)          m = Suc (aux lt m)
+aux (LRec lt1 lt2 lt3) m = Rec (aux lt1 m) (aux lt2 m) (aux lt3 m)
 
 ----------------------------
 --- evaluador de términos
@@ -41,6 +44,7 @@ sub _ _ (Bound j) | otherwise = Bound j
 sub _ _ (Free n   )           = Free n
 sub i t (u   :@: v)           = sub i t u :@: sub i t v
 sub i t (Lam t'  u)           = Lam t' (sub (i + 1) t u)
+sub i t (Let u v  )           = Let (sub i t u) (sub (i+1) t v) 
 
 -- convierte un valor en el término equivalente
 quote :: Value -> Term
