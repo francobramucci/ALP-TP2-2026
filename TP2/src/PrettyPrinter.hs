@@ -37,6 +37,13 @@ pp ii vs (Lam t c) =
     <> printType t
     <> text ". "
     <> pp (ii + 1) vs c
+pp ii vs (Let lt1 lt2) =
+  text "let "
+    <> text (vs !! ii)
+    <> text " = "
+    <> pp ii vs lt1
+    <> text " in "
+    <> pp (ii + 1) vs lt2
 
 
 isLam :: Term -> Bool
@@ -63,6 +70,7 @@ fv (Bound _         ) = []
 fv (Free  (Global n)) = [n]
 fv (t   :@: u       ) = fv t ++ fv u
 fv (Lam _   u       ) = fv u
+fv (Let t u         ) = fv t ++ fv u
 
 ---
 printTerm :: Term -> Doc

@@ -29,12 +29,12 @@ version :: Version
 version = Version [0,1,0,0] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
-bindir     = "/home/frank/code/LCC/3er_A\241o/ALP/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/bin"
-libdir     = "/home/frank/code/LCC/3er_A\241o/ALP/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/lib/x86_64-linux-ghc-8.8.3/TP2-0.1.0.0-2c9qde79sPOLVEqyS9Uqj7-TP2-exe"
-dynlibdir  = "/home/frank/code/LCC/3er_A\241o/ALP/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/lib/x86_64-linux-ghc-8.8.3"
-datadir    = "/home/frank/code/LCC/3er_A\241o/ALP/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/share/x86_64-linux-ghc-8.8.3/TP2-0.1.0.0"
-libexecdir = "/home/frank/code/LCC/3er_A\241o/ALP/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/libexec/x86_64-linux-ghc-8.8.3/TP2-0.1.0.0"
-sysconfdir = "/home/frank/code/LCC/3er_A\241o/ALP/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/etc"
+bindir     = "/home/frank/code/ALP-TP2-2026/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/bin"
+libdir     = "/home/frank/code/ALP-TP2-2026/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/lib/x86_64-linux-ghc-8.8.3/TP2-0.1.0.0-2c9qde79sPOLVEqyS9Uqj7-TP2-exe"
+dynlibdir  = "/home/frank/code/ALP-TP2-2026/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/lib/x86_64-linux-ghc-8.8.3"
+datadir    = "/home/frank/code/ALP-TP2-2026/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/share/x86_64-linux-ghc-8.8.3/TP2-0.1.0.0"
+libexecdir = "/home/frank/code/ALP-TP2-2026/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/libexec/x86_64-linux-ghc-8.8.3/TP2-0.1.0.0"
+sysconfdir = "/home/frank/code/ALP-TP2-2026/TP2/.stack-work/install/x86_64-linux-nix/6601676a9afa409f55b5a9a0bf7718f5566b5a0ab288d2019f37ad4df386fa8f/8.8.3/etc"
 
 getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: IO FilePath
 getBinDir = catchIO (getEnv "TP2_bindir") (\_ -> return bindir)

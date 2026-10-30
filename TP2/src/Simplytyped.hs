@@ -23,11 +23,12 @@ conversion :: LamTerm -> Term
 conversion lt = aux lt M.empty
 
 aux :: LamTerm -> M.Map String Int -> Term
-aux (LVar s)       m = case M.lookup s m of
-                            Just x  -> Bound x
-                            _       -> Free (Global s)
-aux (LAbs s ty lt) m = Lam ty (aux lt (M.insert s 0 (M.map (+1) m)))
-aux (LApp lt1 lt2) m = (aux lt1 m) :@: (aux lt2 m)
+aux (LVar s)         m = case M.lookup s m of
+                              Just x  -> Bound x
+                              _       -> Free (Global s)
+aux (LAbs s ty lt)   m = Lam ty (aux lt (M.insert s 0 (M.map (+1) m)))
+aux (LApp lt1 lt2)   m = (aux lt1 m) :@: (aux lt2 m)
+aux (LLet s lt1 lt2) m = Let (aux lt1 m) (aux lt2 (M.insert s 0 (M.map (+1) m)))
 
 ----------------------------
 --- evaluador de términos
@@ -48,11 +49,13 @@ quote (VLam t f) = Lam t f
 -- evalúa un término en un entorno dado
 -- Qué pasa si la var no está en el entorno? Lo maneja el type checker
 eval :: NameEnv Value Type -> Term -> Value
-eval nvs fv@(Free n)   = case lookup n nvs of
-                              Just (v, _) -> v
-eval nvs (lt1 :@: lt2) = case eval nvs lt1 of
-                              VLam _ alt -> eval nvs (sub 0 (quote (eval nvs lt2)) alt)
-eval nvs (Lam t lt)    = VLam t lt
+eval nvs fv@(Free n)    = case lookup n nvs of
+                               Just (v, _) -> v
+eval nvs (lt1 :@: lt2)  = case eval nvs lt1 of
+                               VLam _ alt -> eval nvs (sub 0 (quote (eval nvs lt2)) alt)
+eval nvs (Lam t lt)     = VLam t lt
+eval nvs (Let lt1 lt2)  = let v = quote (eval nvs lt1)
+                          in eval nvs (sub 0 v lt2)
 
 
 ----------------------
@@ -94,12 +97,26 @@ notfoundError n = err $ show n ++ " no está definida."
 infer' :: Context -> NameEnv Value Type -> Term -> Either String Type
 infer' c _ (Bound i) = ret (c !! i)
 infer' _ e (Free  n) = case lookup n e of
-  Nothing     -> notfoundError n
-  Just (_, t) -> ret t
+                            Nothing     -> notfoundError n
+                            Just (_, t) -> ret t
 infer' c e (t :@: u) = infer' c e t >>= \tt -> infer' c e u >>= \tu ->
   case tt of
-    FunT t1 t2 -> if (tu == t1) then ret t2 else matchError t1 tu
-    _          -> notfunError tt
+       FunT t1 t2 -> if (tu == t1) then ret t2 else matchError t1 tu
+       _          -> notfunError tt
 infer' c e (Lam t u) = infer' (t : c) e u >>= \tu -> ret $ FunT t tu
+infer' c e (Let t u) = do
+  t1 <- infer' c e t
+  t2 <- infer' (t1:c) e u
+  ret t2
+
+
+
+
+
+
+
+
+
+
 
 
