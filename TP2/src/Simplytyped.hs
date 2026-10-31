@@ -44,22 +44,33 @@ sub _ _ (Bound j) | otherwise = Bound j
 sub _ _ (Free n   )           = Free n
 sub i t (u   :@: v)           = sub i t u :@: sub i t v
 sub i t (Lam t'  u)           = Lam t' (sub (i + 1) t u)
-sub i t (Let u v  )           = Let (sub i t u) (sub (i+1) t v) 
+sub i t (Let u v  )           = Let (sub i t u) (sub (i+1) t v)
+sub i t (Zero     )           = Zero
+sub i t (Suc lt   )           = Suc (sub i t lt)
+sub i t (Rec lt1 lt2 lt3)     = Rec (sub i t lt1) (sub i t lt2) (sub i t lt3)
 
 -- convierte un valor en el término equivalente
 quote :: Value -> Term
 quote (VLam t f) = Lam t f
+quote (VNum NZero) = Zero
+quote (VNum (NSuc nv)) = Suc (quote (VNum nv))
 
 -- evalúa un término en un entorno dado
 -- Qué pasa si la var no está en el entorno? Lo maneja el type checker
 eval :: NameEnv Value Type -> Term -> Value
-eval nvs fv@(Free n)    = case lookup n nvs of
-                               Just (v, _) -> v
-eval nvs (lt1 :@: lt2)  = case eval nvs lt1 of
-                               VLam _ alt -> eval nvs (sub 0 (quote (eval nvs lt2)) alt)
-eval nvs (Lam t lt)     = VLam t lt
-eval nvs (Let lt1 lt2)  = let v = quote (eval nvs lt1)
-                          in eval nvs (sub 0 v lt2)
+eval nvs fv@(Free n)            = case lookup n nvs of
+                                       Just (v, _) -> v
+eval nvs (lt1 :@: lt2)          = let VLam _ alt = eval nvs lt1
+                                  in eval nvs (sub 0 (quote (eval nvs lt2)) alt)
+eval nvs (Lam t lt)             = VLam t lt
+eval nvs (Let lt1 lt2)          = let v = quote (eval nvs lt1)
+                                  in eval nvs (sub 0 v lt2)
+eval nvs Zero                   = VNum NZero
+eval nvs (Suc lt)               = let VNum nv = eval nvs lt
+                                  in VNum (NSuc nv)
+eval nvs (Rec lt1 lt2 Zero)     = eval nvs lt1
+eval nvs (Rec lt1 lt2 (Suc lt)) = let nv = quote (eval nvs lt)
+                                  in eval nvs ((lt2 :@: (Rec lt1 lt2 nv)) :@: nv)
 
 
 ----------------------
@@ -112,6 +123,22 @@ infer' c e (Let t u) = do
   t1 <- infer' c e t
   t2 <- infer' (t1:c) e u
   ret t2
+infer' c e Zero      = ret NatT
+infer' c e (Suc t)   = do
+  tt <- infer' c e t
+  case tt of
+       NatT -> ret NatT
+       _    -> matchError NatT tt
+infer' c e (Rec t1 t2 t3) = do
+  t <- infer' c e t1
+  tt2 <- infer' c e t2
+  case tt2 of
+       et@(FunT ta (FunT NatT tb)) | ta == tb && ta == t -> do tt3 <- infer' c e t3 
+                                                               if tt3 == NatT then ret t 
+                                                                              else matchError NatT tt3
+       _                                                 -> matchError (FunT t (FunT NatT t)) tt2
+        
+    
 
 
 
